@@ -1,0 +1,27 @@
+server:
+  applicationConnectors:
+    - type: http
+      port: 8080
+  adminConnectors:
+    - type: http
+      port: 8081
+
+logging:
+  level: INFO
+  appenders:
+    - type: console
+
+
+athena:
+  bucket: ${HAYSTACK_PROP_ATHENA_BUCKET:-haystack-spans-int}
+  prefix: "${HAYSTACK_PROP_ATHENA_PREFIX:-athena-output}"
+  region: ${HAYSTACK_PROP_ATHENA_REGION:-us-west-2}
+  database: ${HAYSTACK_PROP_ATHENA_DATABASE:-haystack_offline_trends}
+
+executor:
+  name: k8s
+  props:
+    image: "ashishagg0701/haystack-parquet-writer:2"
+    namespace: haystack-apps
+    labelselector: "k8s-app=haystack-sql"
+    replicas: 1

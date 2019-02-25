@@ -1,0 +1,31 @@
+server:
+  applicationConnectors:
+    - type: http
+      port: 8080
+  adminConnectors:
+    - type: http
+      port: 8081
+
+logging:
+  level: INFO
+  appenders:
+    - type: console
+
+sql:
+  query: '${HAYSTACK_PROP_SQL_QUERY:-undefined}'
+  id: ${HAYSTACK_PROP_SQL_QUERY_ID:-111}
+
+s3:
+  bucket: ${HAYSTACK_PROP_S3_BUCKET:-haystack-spans-test}
+  region: ${HAYSTACK_PROP_S3_REGION:-us-west-2}
+
+kafka:
+  topic: ${HAYSTACK_PROP_KAFKA_TOPIC:-proto-spans}
+  threads: ${HAYSTACK_PROP_KAFKA_THREADS:-2}
+  closeTimeoutMillis: ${HAYSTACK_PROP_KAFKA_CLOSE_TIMEOUT_MILLIS:-15000}
+  maxWakeups: ${HAYSTACK_PROP_KAFKA_MAX_WAKEUPS:-50}
+  wakeupTimeoutMillis: ${HAYSTACK_PROP_KAFKA_WAKEUP_TIMEOUT_MILLIS:-3000}
+  pollTimeoutMillis: ${HAYSTACK_PROP_KAFKA_POLL_TIMEOUT_MILLIS:-100}
+  consumer:
+    bootstrap.servers: "localhost:9092"
+    auto.offset.reset: earliest
