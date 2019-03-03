@@ -119,7 +119,7 @@ public class K8sQueryExecutor implements QueryExecutor {
             });
 
             m.setCreateTimestamp(deployment.getMetadata().getCreationTimestamp());
-            m.setRunning(Objects.equals(deployment.getStatus().getReplicas(), deployment.getStatus().getReadyReplicas()));
+            m.setRunning(deployment.getStatus().getReplicas() > 0 && Objects.equals(deployment.getStatus().getReplicas(), deployment.getStatus().getReadyReplicas()));
             result.add(m);
         }
 

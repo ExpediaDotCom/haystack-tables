@@ -18,12 +18,6 @@ spec:
       containers:
       - name: replace_me
         image: ashishagg0701/haystack-parquet-writer:1
-        liveness:
-          httpGet:
-            path: /isActive
-            port: 8080
-          initialDelaySeconds: 30
-          periodSeconds: 10
         resources:
           limits:
             cpu: 250m
