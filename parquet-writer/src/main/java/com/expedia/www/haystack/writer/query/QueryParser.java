@@ -1,5 +1,6 @@
 package com.expedia.www.haystack.writer.query;
 
+import com.expedia.www.haystack.table.entities.Query;
 import lombok.Getter;
 import org.apache.avro.Schema;
 import org.apache.avro.SchemaBuilder;

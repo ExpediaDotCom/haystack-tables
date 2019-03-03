@@ -7,7 +7,6 @@ import com.expedia.open.tracing.Span;
 import com.expedia.www.haystack.writer.SpanDeserializer;
 import com.expedia.www.haystack.writer.config.AppConfiguration;
 import com.expedia.www.haystack.writer.config.KafkaConfiguration;
-import com.expedia.www.haystack.writer.config.SqlQueryConfiguration;
 import com.expedia.www.haystack.writer.query.QueryParser;
 import com.expedia.www.haystack.writer.uploader.Uploader;
 import lombok.extern.slf4j.Slf4j;
@@ -29,7 +28,6 @@ public class Task implements Runnable, Closeable {
     private final int taskId;
     private final KafkaConfiguration cfg;
     private final Uploader uploader;
-    private final SqlQueryConfiguration sqlQuery;
     private final QueryParser queryParser;
     private final ScheduledExecutorService wakeupScheduler;
     private final AtomicBoolean shutdownRequested;
@@ -76,10 +74,8 @@ public class Task implements Runnable, Closeable {
 
     public Task(final int taskId, final AppConfiguration cfg, final MetricRegistry registry) {
         this.lag = registry.histogram("kafka.iterator.age.ms");
-
         this.taskId = taskId;
         this.cfg = cfg.getKafka();
-        this.sqlQuery = cfg.getSql();
         this.uploader = cfg.getUploader();
         this.stateListeners = new ArrayList<>();
         this.queryParser = cfg.getSql().getParser();

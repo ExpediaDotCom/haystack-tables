@@ -1,7 +1,7 @@
 package com.expedia.www.haystack.writer.config;
 
 
-import com.expedia.www.haystack.writer.query.Query;
+import com.expedia.www.haystack.table.entities.Query;
 import com.expedia.www.haystack.writer.query.QueryParser;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;

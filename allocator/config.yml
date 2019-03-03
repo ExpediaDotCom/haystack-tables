@@ -20,7 +20,7 @@ athena:
 executor:
   name: k8s
   props:
-    image: "ashishagg0701/haystack-parquet-writer:2"
+    image: "ashishagg0701/haystack-table-parquet-writer:2"
     namespace: haystack-apps
     labelselector: "k8s-app=haystack-table"
     replicas: 1

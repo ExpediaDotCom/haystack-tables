@@ -3,9 +3,9 @@ package com.expedia.www.haystack.sql.resources;
 
 import com.codahale.metrics.annotation.Timed;
 import com.expedia.www.haystack.sql.entities.QueryMetadata;
-import com.expedia.www.haystack.sql.entities.QueryRequest;
 import com.expedia.www.haystack.sql.entities.QueryResponse;
 import com.expedia.www.haystack.sql.executors.QueryExecutor;
+import com.expedia.www.haystack.table.entities.Query;
 import org.apache.commons.lang3.Validate;
 
 import javax.ws.rs.*;
@@ -27,7 +27,7 @@ public class SqlQuery {
     @POST
     @Consumes(MediaType.APPLICATION_JSON)
     @Timed
-    public Response submit(final QueryRequest request) throws Exception {
+    public Response submit(final Query request) throws Exception {
         final QueryResponse response = executor.execute(request);
         return Response.status(response.getHttpStatusCode()).entity(response).build();
     }

@@ -1,13 +1,13 @@
 package com.expedia.www.haystack.sql.utils;
 
-import com.expedia.www.haystack.sql.entities.QueryRequest;
+import com.expedia.www.haystack.table.entities.Query;
 
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
 public abstract class Utils {
-    public static boolean isSubset(final QueryRequest requested, final QueryRequest running) {
+    public static boolean isSubset(final Query requested, final Query running) {
         final List<String> runningSelectFields =
                 running.getSelect().stream().map(String::toLowerCase).collect(Collectors.toList());
 

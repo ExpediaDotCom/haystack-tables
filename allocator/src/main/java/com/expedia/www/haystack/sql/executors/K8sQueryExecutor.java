@@ -1,8 +1,8 @@
 package com.expedia.www.haystack.sql.executors;
 
 import com.expedia.www.haystack.sql.entities.QueryMetadata;
-import com.expedia.www.haystack.sql.entities.QueryRequest;
 import com.expedia.www.haystack.sql.entities.QueryResponse;
+import com.expedia.www.haystack.table.entities.Query;
 import com.google.gson.Gson;
 import io.kubernetes.client.ApiClient;
 import io.kubernetes.client.ApiException;
@@ -34,7 +34,7 @@ public class K8sQueryExecutor implements QueryExecutor {
     private String image;
 
     @Override
-    public QueryResponse execute(final QueryRequest request) throws Exception {
+    public QueryResponse execute(final Query request) throws Exception {
         final QueryResponse response = new QueryResponse();
 
         // check if the query is already running with given view name or a similar query already runs with a different name
@@ -64,11 +64,11 @@ public class K8sQueryExecutor implements QueryExecutor {
             // this is to handle a potential race condition where user submits his query more than once
             if (ex.getCode() == 409) {
                 response.setHttpStatusCode(200);
-                response.setMessage("The requested query is already submitted before and is running.");
+                response.setMessage("The requested view was already submitted before and is running now.");
             } else {
                 response.setHttpStatusCode(ex.getCode());
                 response.setMessage(ex.getMessage());
-                log.error("Failed to execute the query {}", request, ex);
+                log.error("Failed to execute the view creation request '{}'", request, ex);
             }
         }
         return response;
@@ -78,7 +78,7 @@ public class K8sQueryExecutor implements QueryExecutor {
 
     }
 
-    private void createDeployment(final QueryRequest request, final QueryResponse response) throws ApiException {
+    private void createDeployment(final Query request, final QueryResponse response) throws ApiException {
         final V1beta2Deployment deployment = Yaml.loadAs(new InputStreamReader(
                         this.getClass().getResourceAsStream("/k8s-deployment.yml")),
                 V1beta2Deployment.class);
@@ -114,7 +114,7 @@ public class K8sQueryExecutor implements QueryExecutor {
                 if(key.equalsIgnoreCase(LAST_UPDATED_ANNOTATION_NAME)) {
                     m.setLastUpdatedTimestamp(new DateTime(Long.parseLong(value)));
                 } else if (key.equalsIgnoreCase(QUERY_ANNOTATION_NAME)) {
-                    m.setQuery(gson.fromJson(value, QueryRequest.class));
+                    m.setQuery(gson.fromJson(value, Query.class));
                 }
             });
 
@@ -140,13 +140,11 @@ public class K8sQueryExecutor implements QueryExecutor {
                     45,
                     false,
                     null);
-            response.setHttpStatusCode(200);
-            response.setMessage("successfully delete !!");
         } catch (ApiException ex) {
-            log.error("Failed to delete the deployment with name{}", viewName, ex);
-            response.setMessage(ex.getMessage());
-            response.setHttpStatusCode(ex.getCode());
+            log.error("Failed to delete the view with name{}", viewName, ex);
         }
+        response.setHttpStatusCode(200);
+        response.setMessage(String.format("The view with name '%s' is deleted now!!", viewName));
         return response;
     }
 
@@ -170,7 +168,7 @@ public class K8sQueryExecutor implements QueryExecutor {
         apis.setApiClient(client);
     }
 
-    private void render(final V1beta2Deployment body, final QueryRequest request) {
+    private void render(final V1beta2Deployment body, final Query request) {
         body.getMetadata().setName(K8S_DEPLOYMENT_NAME_PREFIX + request.getView());
 
         final V1beta2DeploymentSpec spec = body.getSpec();
@@ -183,7 +181,7 @@ public class K8sQueryExecutor implements QueryExecutor {
         addAnnotations(body, request);
     }
 
-    private void addEnvVars(final V1Container container, final QueryRequest query) {
+    private void addEnvVars(final V1Container container, final Query query) {
         final List<V1EnvVar> envVars = container.getEnv() == null ? new ArrayList<>() : container.getEnv();
         envVars.add(new V1EnvVar().name("HAYSTACK_PROP_SQL_QUERY").value(new Gson().toJson(query)));
         System.getenv().forEach((key, value) -> {
@@ -194,7 +192,7 @@ public class K8sQueryExecutor implements QueryExecutor {
         container.setEnv(envVars);
     }
 
-    private void addAnnotations(final V1beta2Deployment deployment, final QueryRequest query) {
+    private void addAnnotations(final V1beta2Deployment deployment, final Query query) {
         Map<String, String> annotations = deployment.getMetadata().getAnnotations();
         if (annotations == null) {
             annotations = new HashMap<>();

@@ -1,7 +1,7 @@
 FROM openjdk:8-jre
 MAINTAINER Haystack <haystack@expedia.com>
 
-ENV APP_NAME haystack-parquet-writer
+ENV APP_NAME haystack-table-parquet-writer
 ENV APP_HOME /app/bin
 ENV APP_CONF /app/conf
 ENV JMXTRANS_AGENT jmxtrans-agent-1.2.6

@@ -10,7 +10,7 @@
     <version>1.0-SNAPSHOT</version>
   </parent>
 
-  <artifactId>haystack-parquet-writer</artifactId>
+  <artifactId>haystack-table-parquet-writer</artifactId>
   <packaging>jar</packaging>
 
   <properties>
@@ -22,6 +22,12 @@
   </properties>
 
   <dependencies>
+    <dependency>
+      <groupId>com.expedia.www</groupId>
+      <artifactId>haystack-table-commons</artifactId>
+      <version>${project.version}</version>
+    </dependency>
+
     <dependency>
       <groupId>org.apache.kafka</groupId>
       <artifactId>kafka_${scala.major.minor.version}</artifactId>

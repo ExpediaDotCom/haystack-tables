@@ -1,14 +1,14 @@
 package com.expedia.www.haystack.sql.executors;
 
 import com.expedia.www.haystack.sql.entities.QueryMetadata;
-import com.expedia.www.haystack.sql.entities.QueryRequest;
 import com.expedia.www.haystack.sql.entities.QueryResponse;
+import com.expedia.www.haystack.table.entities.Query;
 
 import java.util.List;
 import java.util.Map;
 
 public interface QueryExecutor {
-    QueryResponse execute(QueryRequest query) throws Exception;
+    QueryResponse execute(Query query) throws Exception;
 
     List<QueryMetadata> list() throws Exception;
 

@@ -24,6 +24,7 @@
   </properties>
 
   <modules>
+    <module>commons</module>
     <module>allocator</module>
     <module>parquet-writer</module>
   </modules>
