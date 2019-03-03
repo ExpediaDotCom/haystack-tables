@@ -28,6 +28,26 @@ curl -XPOST -H "Content-Type: application/json" -d '
 
 ```
 curl "http://localhost:8080/sql"
+
+Response:
+
+[
+  {
+    "createTimestamp": "2019-03-03T10:17:50.000Z",
+    "lastUpdatedTimestamp": "2019-03-03T10:17:50.866Z",
+    "query": {
+      "view": "oms-test",
+      "select": [
+        "tags[errorcode]",
+        "operationname"
+      ],
+      "where": {
+        "servicename": "oms"
+      }
+    },
+    "running": true
+  }
+]
 ```
 
 ##### Delete a view:
