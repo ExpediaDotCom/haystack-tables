@@ -1,14 +1,13 @@
-##Architecture
+## Architecture
 
 ![Architecture](./docs/images/Haystack_Tables.png)
 
 
-##How to use?
+### Getting Started?
 Launch the table-allocator dropwizard app that exposes endpoint for creating and listing the views. 
-The allocator uses kubernetes for resource allocation by default. If you are using minikube, make sure it is running and current k8s context points to it.
+The allocator uses kubernetes for running parquet-writers by default. If you are using minikube, make sure it is running and current k8s context points to it.
 
-
-### Create a new view:
+##### Create a new view:
 
 ```
 curl -XPOST -H "Content-Type: application/json" -d '
@@ -25,13 +24,13 @@ curl -XPOST -H "Content-Type: application/json" -d '
 ```
 
 
-### List all views:
+##### List all views:
 
 ```
 curl "http://localhost:8080/sql"
 ```
 
-### Delete a view:
+##### Delete a view:
 
 ```
 curl -XDELETE "http://localhost:8080/sql/oms"
