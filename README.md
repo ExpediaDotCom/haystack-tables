@@ -36,4 +36,17 @@ curl "http://localhost:8080/sql"
 curl -XDELETE "http://localhost:8080/sql/oms"
 ```
 
+### S3 Data
+Parquet writer runs independently for each requested view. They put the parquet data under a configured bucket name with following partitoning strategy:
+
+`s3://bucket-name/sql/{view-name}/year=2019/month=02/day=03/hour=12/..`
+
+The parquet files are named with the last kafka-offset value of the record in the file itself.
+
+### Athena Tables
+Allocator provides an endpoint `/athena/refresh` that takes following action for all the running views:
+* Create partitioned table in Athena under haystack_tables database
+* Repair the already existing table to add new s3 partitions
+
+We run a cron job that hits this endpoint after every few minutes to make sure the tables are always upto date.
 
