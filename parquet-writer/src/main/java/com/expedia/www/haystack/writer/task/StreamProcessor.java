@@ -34,7 +34,6 @@ public class StreamProcessor implements Closeable {
     private final QueryParser parser;
     private final Schema schema;
     private final Uploader uploader;
-    private final String queryId;
     private final Histogram lag;
 
     private ParquetWriter<Object> writer;
@@ -42,12 +41,11 @@ public class StreamProcessor implements Closeable {
     private long matchedRecords = 0;
     private File file;
 
-    public StreamProcessor(final QueryParser queryParser, final Uploader uploader, final String queryId, final Histogram lag) {
+    public StreamProcessor(final QueryParser queryParser, final Uploader uploader, final Histogram lag) {
         Validate.notNull(queryParser);
         this.schema = queryParser.getSchema();
         this.parser = queryParser;
         this.uploader = uploader;
-        this.queryId = queryId;
         this.lag = lag;
     }
 
@@ -111,7 +109,9 @@ public class StreamProcessor implements Closeable {
 
     private String createUploadFullPath(long timestamp, int partition, long lastOffset) {
         final DateTime dt = new DateTime(timestamp);
-        return String.format("sql/id=%s/year=%d/month=%02d/day=%02d/hour=%02d/%s.parquet", queryId, dt.getYear(), dt.getMonthOfYear(), dt.getDayOfMonth(), dt.getHourOfDay(), partition +"_" + lastOffset);
+        return String.format("sql/%s/year=%d/month=%02d/day=%02d/hour=%02d/%s.parquet",
+                parser.getName(),
+                dt.getYear(), dt.getMonthOfYear(), dt.getDayOfMonth(), dt.getHourOfDay(), partition +"_" + lastOffset);
     }
 
     private boolean shouldFlush() {

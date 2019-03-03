@@ -13,7 +13,6 @@ logging:
 
 sql:
   query: '${HAYSTACK_PROP_SQL_QUERY:-undefined}'
-  id: ${HAYSTACK_PROP_SQL_QUERY_ID:-111}
 
 s3:
   bucket: ${HAYSTACK_PROP_S3_BUCKET:-haystack-spans-test}
@@ -28,4 +27,4 @@ kafka:
   pollTimeoutMillis: ${HAYSTACK_PROP_KAFKA_POLL_TIMEOUT_MILLIS:-100}
   consumer:
     bootstrap.servers: "localhost:9092"
-    auto.offset.reset: earliest
+    auto.offset.reset: latest

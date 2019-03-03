@@ -13,6 +13,9 @@ import java.util.Map;
 @ToString
 public class Query {
     @JsonProperty
+    private String view;
+
+    @JsonProperty
     private List<String> select;
 
     @JsonProperty

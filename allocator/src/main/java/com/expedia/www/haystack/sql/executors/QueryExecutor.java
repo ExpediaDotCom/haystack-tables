@@ -8,7 +8,7 @@ import java.util.List;
 import java.util.Map;
 
 public interface QueryExecutor {
-    QueryResponse execute(QueryRequest query);
+    QueryResponse execute(QueryRequest query) throws Exception;
 
     List<QueryMetadata> list() throws Exception;
 

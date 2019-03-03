@@ -10,8 +10,6 @@ import org.joda.time.DateTime;
 @NoArgsConstructor
 @ToString
 public class QueryMetadata {
-    @JsonProperty
-    private String executionId;
 
     @JsonProperty
     private DateTime createTimestamp;

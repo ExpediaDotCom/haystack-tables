@@ -19,14 +19,14 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.util.*;
 
-import static com.expedia.www.haystack.sql.utils.Utils.appId;
+import static com.expedia.www.haystack.sql.utils.Utils.isSubset;
 
 @Slf4j
 public class K8sQueryExecutor implements QueryExecutor {
 
     private static String QUERY_ANNOTATION_NAME = "haystack/query";
     private static String LAST_UPDATED_ANNOTATION_NAME = "haystack/lastUpdatedTimestamp";
-    private static String K8S_DEPLOYMENT_NAME_PREFIX = "haystack-sql-";
+    private static String K8S_DEPLOYMENT_NAME_PREFIX = "haystack-table-";
     private AppsV1beta2Api apis;
     private String namespace;
     private String labelSelector;
@@ -34,30 +34,61 @@ public class K8sQueryExecutor implements QueryExecutor {
     private String image;
 
     @Override
-    public QueryResponse execute(final QueryRequest query) {
+    public QueryResponse execute(final QueryRequest request) throws Exception {
         final QueryResponse response = new QueryResponse();
 
-        V1beta2Deployment deployment = Yaml.loadAs(new InputStreamReader(
-                this.getClass().getResourceAsStream("/deployment.yml")),
-                V1beta2Deployment.class);
+        // check if the query is already running with given view name or a similar query already runs with a different name
+        final List<QueryMetadata> runningQueries = list();
+        for(final QueryMetadata running : runningQueries) {
+            // is there is a name conflict?
+            if(running.getQuery().getView().equalsIgnoreCase(request.getView())) {
+                response.setMessage(String.format("The view with the given name '%s' is already running.", request.getView()));
+                response.setHttpStatusCode(409);
+                return response;
+            } else {
+                // is this query a subset of already running query?
+                if(isSubset(request, running.getQuery())) {
+                    response.setMessage(String.format("A view with name '%s' exists that satisfies the request",
+                            running.getQuery().getView()));
+                    response.setHttpStatusCode(409);
+                    return response;
+                }
+            }
+        }
 
-        String executionId = render(deployment, query);
+
         try {
-            apis.createNamespacedDeployment(namespace, deployment, false, "true", "false");
-            response.setHttpStatusCode(200);
-            response.setExecutionId(executionId);
-            response.setMessage("The requested query has been submitted successfully!");
-        } catch (ApiException ex) {
+            createDeployment(request, response);
+            createService();
+        } catch (final ApiException ex) {
+            // this is to handle a potential race condition where user submits his query more than once
             if (ex.getCode() == 409) {
                 response.setHttpStatusCode(200);
                 response.setMessage("The requested query is already submitted before and is running.");
             } else {
                 response.setHttpStatusCode(ex.getCode());
                 response.setMessage(ex.getMessage());
-                log.error("Failed to execute the query {}", query, ex);
+                log.error("Failed to execute the query {}", request, ex);
             }
         }
         return response;
+    }
+
+    private void createService() {
+
+    }
+
+    private void createDeployment(final QueryRequest request, final QueryResponse response) throws ApiException {
+        final V1beta2Deployment deployment = Yaml.loadAs(new InputStreamReader(
+                        this.getClass().getResourceAsStream("/k8s-deployment.yml")),
+                V1beta2Deployment.class);
+
+        render(deployment, request);
+
+        apis.createNamespacedDeployment(namespace, deployment, false, "true", "false");
+        response.setHttpStatusCode(200);
+        response.setViewName(request.getView());
+        response.setMessage("The requested query has been submitted successfully!");
     }
 
     @Override
@@ -87,7 +118,6 @@ public class K8sQueryExecutor implements QueryExecutor {
                 }
             });
 
-            m.setExecutionId(deployment.getMetadata().getName().replace(K8S_DEPLOYMENT_NAME_PREFIX, ""));
             m.setCreateTimestamp(deployment.getMetadata().getCreationTimestamp());
             m.setRunning(Objects.equals(deployment.getStatus().getReplicas(), deployment.getStatus().getReadyReplicas()));
             result.add(m);
@@ -97,12 +127,12 @@ public class K8sQueryExecutor implements QueryExecutor {
     }
 
     @Override
-    public QueryResponse delete(String executionId) throws Exception {
+    public QueryResponse delete(String viewName) throws Exception {
         final QueryResponse response = new QueryResponse();
         final V1DeleteOptions options = new V1DeleteOptions();
         try {
-            response.setExecutionId(executionId);
-            apis.deleteNamespacedDeployment(K8S_DEPLOYMENT_NAME_PREFIX + executionId,
+            response.setViewName(viewName);
+            apis.deleteNamespacedDeployment(K8S_DEPLOYMENT_NAME_PREFIX + viewName,
                     namespace,
                     options,
                     null,
@@ -113,7 +143,7 @@ public class K8sQueryExecutor implements QueryExecutor {
             response.setHttpStatusCode(200);
             response.setMessage("successfully delete !!");
         } catch (ApiException ex) {
-            log.error("Failed to delete the deployment with name{}", executionId, ex);
+            log.error("Failed to delete the deployment with name{}", viewName, ex);
             response.setMessage(ex.getMessage());
             response.setHttpStatusCode(ex.getCode());
         }
@@ -140,25 +170,22 @@ public class K8sQueryExecutor implements QueryExecutor {
         apis.setApiClient(client);
     }
 
-    private String render(V1beta2Deployment body, final QueryRequest query) {
-        final String id = appId(query);
-        body.getMetadata().setName(K8S_DEPLOYMENT_NAME_PREFIX + id);
+    private void render(final V1beta2Deployment body, final QueryRequest request) {
+        body.getMetadata().setName(K8S_DEPLOYMENT_NAME_PREFIX + request.getView());
 
         final V1beta2DeploymentSpec spec = body.getSpec();
         spec.replicas(replicas);
         for (final V1Container container : spec.getTemplate().getSpec().getContainers()) {
-            container.setName(id);
+            container.setName(request.getView());
             container.setImage(this.image);
-            addEnvVars(container, query, id);
+            addEnvVars(container, request);
         }
-        addAnnotations(body, query);
-        return id;
+        addAnnotations(body, request);
     }
 
-    private void addEnvVars(final V1Container container, final QueryRequest query, final String id) {
+    private void addEnvVars(final V1Container container, final QueryRequest query) {
         final List<V1EnvVar> envVars = container.getEnv() == null ? new ArrayList<>() : container.getEnv();
         envVars.add(new V1EnvVar().name("HAYSTACK_PROP_SQL_QUERY").value(new Gson().toJson(query)));
-        envVars.add(new V1EnvVar().name("HAYSTACK_PROP_SQL_QUERY_ID").value(id));
         System.getenv().forEach((key, value) -> {
             if (key.startsWith("HAYSTACK_PROP_KAFKA_") || key.startsWith("HAYSTACK_PROP_S3_")) {
                 envVars.add(new V1EnvVar().name(key).value(value));

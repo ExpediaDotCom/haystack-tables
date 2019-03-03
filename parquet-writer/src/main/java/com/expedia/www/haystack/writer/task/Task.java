@@ -65,7 +65,7 @@ public class Task implements Runnable, Closeable {
         public void onPartitionsAssigned(Collection<TopicPartition> assignedPartitions) {
             log.info("Partitions {} assigned at the beginning of consumer rebalance for taskId={}", assignedPartitions, taskId);
             for(final TopicPartition p : assignedPartitions) {
-                final StreamProcessor newProcessor = new StreamProcessor(queryParser, uploader, sqlQuery.getId(), lag);
+                final StreamProcessor newProcessor = new StreamProcessor(queryParser, uploader, lag);
                 final StreamProcessor previousProcessor = processors.putIfAbsent(p, newProcessor);
                 if (previousProcessor == null) {
                     newProcessor.init();
@@ -210,7 +210,7 @@ public class Task implements Runnable, Closeable {
     }
 
     private static KafkaConsumer<String, Span> createConsumer(final AppConfiguration cfg) {
-        final Properties consumerProps = cfg.getKafka().getConsumerProps(cfg.getSql().getId());
+        final Properties consumerProps = cfg.getKafka().getConsumerProps(cfg.getSql().getParser().getName());
         return new KafkaConsumer<>(
                 consumerProps,
                 new StringDeserializer(),

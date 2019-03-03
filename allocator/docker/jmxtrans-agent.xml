@@ -16,7 +16,7 @@
         <port>${HAYSTACK_GRAPHITE_PORT:2003}</port>
         <enabled>${HAYSTACK_GRAPHITE_ENABLED:false}</enabled>
         <!-- template used in influxdb : "haystack.* system.subsystem.application.host.class.measurement*" -->
-        <namePrefix>haystack.offline.allocator.#hostname#.</namePrefix>
+        <namePrefix>haystack.tables.allocator.#hostname#.</namePrefix>
     </outputWriter>
     <collectIntervalInSeconds>60</collectIntervalInSeconds>
 </jmxtrans-agent>

@@ -48,11 +48,11 @@ public class KafkaConfiguration {
     @Setter
     private Map<String, String> consumer;
 
-    public Properties getConsumerProps(final String queryId) {
+    public Properties getConsumerProps(final String queryName) {
         final Properties props = new Properties();
         consumer.forEach(props::setProperty);
         props.setProperty(ConsumerConfig.ENABLE_AUTO_COMMIT_CONFIG, "false");
-        props.setProperty(ConsumerConfig.GROUP_ID_CONFIG, "haystack-parquet-writer-" + queryId);
+        props.setProperty(ConsumerConfig.GROUP_ID_CONFIG, "haystack-table-parquet-writer-" + queryName);
         final Map<String, String> env = System.getenv();
         env.forEach((key, value) -> {
             if (key.startsWith(HaystackConsumerEnvPrefix)) {

@@ -7,7 +7,7 @@ import lombok.NoArgsConstructor;
 @Data
 @NoArgsConstructor
 public class QueryResponse {
-    String executionId;
+    String viewName;
 
     String message;
 

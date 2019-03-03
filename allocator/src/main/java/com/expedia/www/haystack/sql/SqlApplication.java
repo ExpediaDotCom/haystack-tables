@@ -2,6 +2,7 @@ package com.expedia.www.haystack.sql;
 
 import com.expedia.www.haystack.sql.config.AppConfiguration;
 import com.expedia.www.haystack.sql.executors.QueryExecutor;
+import com.expedia.www.haystack.sql.resources.AthenaTables;
 import com.expedia.www.haystack.sql.resources.HealthCheck;
 import com.expedia.www.haystack.sql.resources.SqlQuery;
 import com.fasterxml.jackson.databind.SerializationFeature;
@@ -36,7 +37,8 @@ public class SqlApplication extends Application<AppConfiguration> {
             if (executor.name().equalsIgnoreCase(config.getExecutor().getName())) {
                 //initialize the executor
                 executor.init(config.getExecutor().getProps());
-                environment.jersey().register(new SqlQuery(executor, new AthenaRefreshJob(config.getAthena())));
+                environment.jersey().register(new SqlQuery(executor));
+                environment.jersey().register(new AthenaTables(executor, new AthenaRefreshJob(config.getAthena())));
                 break;
             }
         }

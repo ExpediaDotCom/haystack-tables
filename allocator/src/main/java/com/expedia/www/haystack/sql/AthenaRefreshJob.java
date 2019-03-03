@@ -34,7 +34,7 @@ public class AthenaRefreshJob {
 
 
     public void refresh(final QueryMetadata query) {
-        final String table = String.format("%s.id_%s", config.getDatabase(), query.getExecutionId());
+        final String table = String.format("%s.%s", config.getDatabase(), query.getQuery().getView());
         creatTable(query, table);
         repairTable(table);
         log.info("refreshing athena for query {}", query);
@@ -47,7 +47,7 @@ public class AthenaRefreshJob {
     }
 
     private void creatTable(final QueryMetadata query, final String tableName) {
-        final String sql = String.format(createTableTemplate, tableName, formTableColumns(query), query.getExecutionId());
+        final String sql = String.format(createTableTemplate, tableName, formTableColumns(query), query.getQuery().getView());
         executeQuery(sql);
     }
 

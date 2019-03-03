@@ -5,7 +5,6 @@ import javax.ws.rs.Path;
 
 @Path("/isActive")
 public class HealthCheck {
-
     @GET
     public String isHealthy() {
         return "ACTIVE";

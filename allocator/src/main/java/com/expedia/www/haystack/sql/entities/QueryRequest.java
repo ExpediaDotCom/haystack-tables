@@ -10,6 +10,10 @@ import java.util.Map;
 @Data
 @NoArgsConstructor
 public class QueryRequest {
+    @JsonProperty
+    private String view;
+
+    @JsonProperty
     private List<String> select;
 
     @JsonProperty

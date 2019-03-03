@@ -2,22 +2,28 @@ kind: Deployment
 apiVersion: apps/v1beta2
 metadata:
   labels:
-    k8s-app: haystack-sql
+    k8s-app: haystack-table
   name: replace_me
 spec:
   replicas: 1
   revisionHistoryLimit: 10
   selector:
     matchLabels:
-      k8s-app: haystack-sql
+      k8s-app: haystack-table
   template:
     metadata:
       labels:
-        k8s-app: haystack-sql
+        k8s-app: haystack-table
     spec:
       containers:
       - name: replace_me
         image: ashishagg0701/haystack-parquet-writer:1
+        liveness:
+          httpGet:
+            path: /isActive
+            port: 8080
+          initialDelaySeconds: 30
+          periodSeconds: 10
         resources:
           limits:
             cpu: 250m

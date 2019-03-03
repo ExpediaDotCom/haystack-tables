@@ -9,6 +9,7 @@ import java.util.HashSet;
 import java.util.Set;
 
 public class QueryParser {
+    @Getter private final String name;
 
     @Getter private final Set<String> selectTags;
     @Getter private boolean selectOperation;
@@ -20,8 +21,9 @@ public class QueryParser {
     @Getter private Schema schema;
 
     public QueryParser(final Query query) {
-        this.selectTags = new HashSet<>();
+        this.name = query.getView();
 
+        this.selectTags = new HashSet<>();
         //handle the select
         for (final String field : query.getSelect()) {
             if (field.startsWith("tags[")) {
@@ -69,6 +71,3 @@ public class QueryParser {
         return assembler.endRecord();
     }
 }
-
-
-//select duration, tags[errorcode], tags[lob], operationname where servicename=oms
