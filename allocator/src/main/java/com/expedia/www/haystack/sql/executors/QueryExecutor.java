@@ -12,7 +12,7 @@ public interface QueryExecutor {
 
     List<QueryMetadata> list() throws Exception;
 
-    QueryResponse delete(String executionId) throws Exception;
+    QueryResponse delete(String viewName) throws Exception;
 
     String name();
 

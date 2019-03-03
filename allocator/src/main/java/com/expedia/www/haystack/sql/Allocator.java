@@ -4,7 +4,7 @@ import com.expedia.www.haystack.sql.config.AppConfiguration;
 import com.expedia.www.haystack.sql.executors.QueryExecutor;
 import com.expedia.www.haystack.sql.resources.AthenaTables;
 import com.expedia.www.haystack.sql.resources.HealthCheck;
-import com.expedia.www.haystack.sql.resources.SqlQuery;
+import com.expedia.www.haystack.sql.resources.Views;
 import com.fasterxml.jackson.databind.SerializationFeature;
 import io.dropwizard.Application;
 import io.dropwizard.configuration.EnvironmentVariableSubstitutor;
@@ -16,7 +16,7 @@ import lombok.extern.slf4j.Slf4j;
 import java.util.ServiceLoader;
 
 @Slf4j
-public class SqlApplication extends Application<AppConfiguration> {
+public class Allocator extends Application<AppConfiguration> {
 
     public void initialize(Bootstrap<AppConfiguration> bootstrap) {
         bootstrap.getObjectMapper().disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS);
@@ -37,8 +37,8 @@ public class SqlApplication extends Application<AppConfiguration> {
             if (executor.name().equalsIgnoreCase(config.getExecutor().getName())) {
                 //initialize the executor
                 executor.init(config.getExecutor().getProps());
-                environment.jersey().register(new SqlQuery(executor));
-                environment.jersey().register(new AthenaTables(executor, new AthenaRefreshJob(config.getAthena())));
+                environment.jersey().register(new Views(executor));
+                environment.jersey().register(new AthenaTables(executor, new AthenaManager(config.getAthena())));
                 break;
             }
         }
@@ -47,7 +47,7 @@ public class SqlApplication extends Application<AppConfiguration> {
     }
 
     public static void main(String[] args) throws Exception {
-        new SqlApplication().run("server", args[0]);
+        new Allocator().run("server", args[0]);
     }
 }
 

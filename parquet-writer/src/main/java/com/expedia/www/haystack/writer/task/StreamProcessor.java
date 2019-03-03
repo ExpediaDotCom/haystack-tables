@@ -109,7 +109,7 @@ public class StreamProcessor implements Closeable {
 
     private String createUploadFullPath(long timestamp, int partition, long lastOffset) {
         final DateTime dt = new DateTime(timestamp);
-        return String.format("sql/%s/year=%d/month=%02d/day=%02d/hour=%02d/%s.parquet",
+        return String.format("views/%s/year=%d/month=%02d/day=%02d/hour=%02d/%s.parquet",
                 parser.getName(),
                 dt.getYear(), dt.getMonthOfYear(), dt.getDayOfMonth(), dt.getHourOfDay(), partition +"_" + lastOffset);
     }

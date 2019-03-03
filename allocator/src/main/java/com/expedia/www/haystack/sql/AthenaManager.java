@@ -15,13 +15,13 @@ import lombok.extern.slf4j.Slf4j;
 import java.io.IOException;
 
 @Slf4j
-public class AthenaRefreshJob {
+public class AthenaManager {
     private final AmazonAthena athena;
     private AthenaConfiguration config;
     private String createTableTemplate;
     private String repairTableTemplate;
 
-    public AthenaRefreshJob(final AthenaConfiguration config) throws IOException {
+    public AthenaManager(final AthenaConfiguration config) throws IOException {
         this.config = config;
         this.athena = AmazonAthenaClientBuilder.standard()
                 .withRegion(config.getRegion())
@@ -47,7 +47,7 @@ public class AthenaRefreshJob {
     }
 
     private void creatTable(final QueryMetadata query, final String tableName) {
-        final String sql = String.format(createTableTemplate, tableName, formTableColumns(query), query.getQuery().getView());
+        final String sql = String.format(createTableTemplate, tableName, formTableColumns(query), this.config.getBucket(), query.getQuery().getView());
         executeQuery(sql);
     }
 

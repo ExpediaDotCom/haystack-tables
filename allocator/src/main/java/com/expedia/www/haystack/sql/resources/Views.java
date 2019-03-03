@@ -13,18 +13,19 @@ import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import java.util.List;
 
-@Path("/sql")
+@Path("/")
 @Produces(MediaType.APPLICATION_JSON)
-public class SqlQuery {
+public class Views {
     private final QueryExecutor executor;
 
-    public SqlQuery(final QueryExecutor executor) {
+    public Views(final QueryExecutor executor) {
         Validate.notNull(executor);
 
         this.executor = executor;
     }
 
     @POST
+    @Path("/view")
     @Consumes(MediaType.APPLICATION_JSON)
     @Timed
     public Response submit(final Query request) throws Exception {
@@ -33,16 +34,17 @@ public class SqlQuery {
     }
 
     @GET
+    @Path("/views")
     @Timed
     public List<QueryMetadata> list() throws Exception {
         return executor.list();
     }
 
     @DELETE
-    @Path("/{view}")
+    @Path("/view/{viewName}")
     @Timed
-    public Response delete(@PathParam("view") String view) throws Exception {
-        QueryResponse response = executor.delete(view);
+    public Response delete(@PathParam("viewName") String viewName) throws Exception {
+        QueryResponse response = executor.delete(viewName);
         return Response.status(response.getHttpStatusCode()).entity(response).build();
     }
 }

@@ -20,14 +20,14 @@ curl -XPOST -H "Content-Type: application/json" -d '
   "where": {
     "servicename": "oms"
   }
-}' "http://localhost:8080/sql"
+}' "http://localhost:8080/view"
 ```
 
 
 ##### List all views:
 
 ```
-curl "http://localhost:8080/sql"
+curl "http://localhost:8080/views"
 
 Response:
 
@@ -53,13 +53,13 @@ Response:
 ##### Delete a view:
 
 ```
-curl -XDELETE "http://localhost:8080/sql/oms"
+curl -XDELETE "http://localhost:8080/view/oms"
 ```
 
 ### S3 Data
 Parquet writer runs independently for each requested view. They put the parquet data under a configured bucket name with following partitoning strategy:
 
-`s3://bucket-name/sql/{view-name}/year=2019/month=02/day=03/hour=12/..`
+`s3://bucket-name/views/{view-name}/year=2019/month=02/day=03/hour=12/..`
 
 The parquet files are named with the last kafka-offset value of the record in the file itself.
 
